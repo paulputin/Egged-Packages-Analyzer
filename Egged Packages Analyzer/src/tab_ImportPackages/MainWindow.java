@@ -103,10 +103,24 @@ public class MainWindow {
 						
 						//TODO
 						// 3. Unzip Packages
+
+						
+						
+						//TODO
+						// 4. Read Versions Files
 						
 						
 						
+						//TODO
+						// 5. Read All Files Headers
 						
+						
+						
+						//TODO
+						// 6. Display Packages and Files Info for Selecting
+						
+						
+	
 						
 						
 						//MyUnziper.PricePackageSetter(fPricesPackage);
@@ -147,14 +161,6 @@ public class MainWindow {
 				
 
 				
-				//TODO
-				// 4. Read Versions Files
-				
-				//TODO
-				// 5. Read All Files Headers
-				
-				//TODO
-				// 6. Display Packages and Files Info for Selecting
 				
 				
 			// End Button Click	
