@@ -47,7 +47,11 @@ public class EggedDataFile {
 	public String getPackageName() {
 		return this.getFileHeader().getPackageName();
 	}
-	
+
+	public String getFileNameFull() {
+		return this.getFileHeader().getFileNameFull();
+	}
+
 	public String getFileNameShort() {
 		return this.getFileHeader().getFileNameShort();
 	}

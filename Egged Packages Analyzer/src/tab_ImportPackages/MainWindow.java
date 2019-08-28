@@ -1,7 +1,6 @@
 package tab_ImportPackages;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
@@ -14,12 +13,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
-
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -28,13 +23,9 @@ import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JTable;
 import javax.swing.JRadioButton;
-import javax.swing.JInternalFrame;
-import javax.swing.JToolBar;
-import javax.swing.JDesktopPane;
-import java.awt.Panel;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MainWindow {
 
@@ -45,7 +36,7 @@ public class MainWindow {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-
+		
 		public Class<?> getColumnClass(int column) {
 			switch (column) {
 			case 0: return String.class;
@@ -79,18 +70,40 @@ public class MainWindow {
 	//PackagesFolderChooser = new JFileChooser();	
 	
 	
-	JTable FilesTable = new JTable();
-	JTable PackagesTable = new JTable();
+	JTable FilesTable = new JTable() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public boolean isCellEditable(int row, int column) {
+            return column == 0;
+        }
+	};
+	JTable PackagesTable = new JTable() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+	};
 	JButton btnStartDataExport = new JButton("Start Data Export");
+	JButton btnSelectSQLiteFile = new JButton("Select SQLite File");
 	JCheckBox chckbxIsExportToExcel = new JCheckBox("Export to Excel");
 	JCheckBox chckbxIsExportToSqlite = new JCheckBox("Export to SQLite");
 	JRadioButton rbtnAutoFilesSelector_ValidFiles = new JRadioButton("Select Valid Files", true);
 	JRadioButton rbtnAutoFilesSelector_CurrentFiles = new JRadioButton("Select Current Files", false);
 	JRadioButton rbtnAutoFilesSelector_NewFiles = new JRadioButton("Select New Files", false);
 	JRadioButton rbtnAutoFilesSelector_AllFiles = new JRadioButton("Select All Files", false);
+	JLabel lblProgressLabel = new JLabel("");
+	JProgressBar progressBar = new JProgressBar();
 
 	
 	//declare EggedPackages and whether to use them
+	String SelectedFolder = new String();
 	HashMap<String, Boolean> EggedExistingPackages = new HashMap<String, Boolean>();
 	List<List<String>> EggedActivePackages = new ArrayList<>();
 	boolean isPackagesReadCorrectly = false;
@@ -149,10 +162,9 @@ public class MainWindow {
 			public void actionPerformed(ActionEvent e) {
 				
 				//Folder Selector
-				String FolderChooserTitle = "Select the Folder with the Egged Zipped Packages...";
 				PackagesFolderChooser = new JFileChooser();
 				PackagesFolderChooser.setCurrentDirectory(new java.io.File("."));
-				PackagesFolderChooser.setDialogTitle(FolderChooserTitle);
+				PackagesFolderChooser.setDialogTitle("Select the Folder with the Egged Zipped Packages...");
 				PackagesFolderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				PackagesFolderChooser.setAcceptAllFileFilterUsed(false);
 				
@@ -160,8 +172,10 @@ public class MainWindow {
 					//System.out.println("getCurrentDirectory(): " +  PackagesFolderChooser.getCurrentDirectory());
 					//System.out.println("getSelectedFile() : " +  PackagesFolderChooser.getSelectedFile());
 					
-					String SelectedFolder = PackagesFolderChooser.getSelectedFile().toString();
+					SelectedFolder = PackagesFolderChooser.getSelectedFile().toString();
 					
+					
+					//Form a list with the packages that are selected as TRUE in the EggedExistingPackages HashMap
 					FormActiveEggedPackages(SelectedFolder);
 
 					// check if Packages Exist
@@ -181,7 +195,6 @@ public class MainWindow {
 										JOptionPane.showMessageDialog(null, "The Table was not filled with Data successfully");
 										ClearTheTables();
 									}
-									
 								} else {
 									JOptionPane.showMessageDialog(null, "Unexpected error reading data file(s)");
 									ClearTheTables();
@@ -194,34 +207,64 @@ public class MainWindow {
 							JOptionPane.showMessageDialog(null, "Enexpeced error while unzipping package(s)");
 							ClearTheTables();
 						}
-					} else 
-					{
+					} else {
 						String FileNames = FormActivePackageNames();
 						JOptionPane.showMessageDialog(null, "Error:\nNot all packages exist in the selected folder\nThe expected packages are:\n" + FileNames);
 						ClearTheTables();
-					}
-					
-						
-						//TODO
-						// 6. Display Packages and Files Info for Selecting
-						// display all files in the table
-
-					}
-			
-					//No Folder was Selected...
+					} // if else 
+				} // if PackagesFolderChooser.showOpenDialog(PackagesFolderChooser) == JFileChooser.APPROVE_OPTION
+				
+					//In This Section: No Folder was Selected...
 					else {
 						//isPackageFolderSelected = false;
 						//textPackagesFolder.setText("");
 						//btnNewButton_2.setEnabled(false);
-						System.out.println("No Packages Folder Selection ");
+						//System.out.println("No Packages Folder Selection ");
 						ClearTheTables();
-					}
-			
-			// End Button Click	
-			} //Action Performed
+					} 
+			} //Action Performed // 			// End Button Click
 		});
 		btnSelectFolder.setBounds(10, 7, 261, 23);
 		panel.add(btnSelectFolder);
+		btnStartDataExport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+
+				// disable controls
+				// read all data from files into EggedData object
+
+				
+				
+				if (EggedDataFilesReadSuccessfully ()) {
+					
+					DisableControls();
+					btnSelectFolder.setEnabled(false);
+					btnSelectSQLiteFile.setEnabled(false);
+					
+					boolean isExportedToExcel = ExportSelectedFilesToExcelSuccessfully();
+					boolean isExportedToSQLite = ExportAllDatatoSQLiteSuccessfully();
+					
+					// if isExportToExcel => run Thread ExportToExcel until it finishes
+					// if isExporttoSQL => run Thread ExportToSQL until it finishes
+					// update process bar
+					
+					
+					//After processes end:
+						// diplay success message
+						// Enable buttons;
+						// Do not Enable Tables
+						// release all big Data Objects
+						// open Validator tab
+					
+				} else {
+					JOptionPane.showMessageDialog(null, "Egged Data Files were not read successfully");
+					ClearTheTables();
+				}
+				
+
+				
+			} //actionPerformed
+		});
 		
 
 		
@@ -231,15 +274,15 @@ public class MainWindow {
 		btnStartDataExport.setBounds(207, 383, 197, 23);
 		panel.add(btnStartDataExport);
 		
-		JLabel lblProgressLabel = new JLabel("");
+		//JLabel lblProgressLabel = new JLabel("");
 		lblProgressLabel.setBounds(10, 417, 579, 14);
 		panel.add(lblProgressLabel);
 		
-		JProgressBar progressBar = new JProgressBar();
+		//JProgressBar progressBar = new JProgressBar();
 		progressBar.setBounds(10, 442, 579, 14);
 		panel.add(progressBar);
 		
-		JButton btnSelectSQLiteFile = new JButton("Select SQLite File");
+		//JButton btnSelectSQLiteFile = new JButton("Select SQLite File");
 		btnSelectSQLiteFile.setIcon(null);
 		btnSelectSQLiteFile.setBounds(452, 7, 137, 23);
 		panel.add(btnSelectSQLiteFile);
@@ -252,6 +295,7 @@ public class MainWindow {
 		//JTable PackagesTable = new JTable();
 		PackagesTable.setEnabled(false);
 		PackagesTable.setBounds(10, 94, 579, 264);
+		PackagesTable.getTableHeader().setReorderingAllowed(false);		//disable table columns reorder
 		
 		JScrollPane PackagesTableScrollPane = new JScrollPane();
 		PackagesTableScrollPane.setBounds(10, 41, 261, 98);
@@ -274,6 +318,39 @@ public class MainWindow {
 		PackagesTableModel.addColumn("Package");
 		PackagesTableModel.addColumn("Data Ver");
 		PackagesTableModel.addColumn("Data Struct");
+	
+		FilesTable.getTableHeader().setReorderingAllowed(false);			// disable table columns reorder (reorder by user makes a problem while clicking on the boolean checkbox) 
+		FilesTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == 1) {
+					int row = FilesTable.rowAtPoint(e.getPoint()); 			//row where the mouse was clicked
+					int column = FilesTable.columnAtPoint(e.getPoint()); 	// column where the mouse was clicked
+					if (column == 0) {										// if boolean column was clicked
+						boolean isChecked = (boolean) FilesTable.getValueAt(row, column);
+						
+						//if Search for File in EggedDataFileList and mark it like isChecked
+						for (int i = 0; i < MyEggedData.getEggedDataFileList().size(); i++) {
+							if (FilesTable.getValueAt(row, 2) == MyEggedData.getEggedDataFileList().get(i).getFileHeader().getFileNameFull()) {
+								MyEggedData.getEggedDataFileList().get(i).getFileHeader().SetIsExportToExcel(isChecked);								
+							}
+						} //for
+						
+						//for debugging purposes
+						//System.out.println("File Name: " + FilesTable.getValueAt(row, 2));
+						//System.out.println("File Contents:"); 
+						//System.out.println();
+						//PrintDataFromEggedDataFileList((String) FilesTable.getValueAt(row, 2));
+						//for debugging purposes
+						
+						//System.out.println("Click. Row " + row + " Column " + FilesTable.columnAtPoint(e.getPoint()) +" Checked " + isChecked);
+					} // if (column == 0)
+				} // if mouse button 1
+				
+				//for debugging purposes
+				//PrintEggedDataProperties();
+			} //mouseClicked
+		});
 		
 		
 		//JTable FilesTable = new JTable();
@@ -382,9 +459,6 @@ public class MainWindow {
 				
 				// Clear table selections
 				ClearTableBooleanSelection(FilesTableModel);
-				
-				
-				
 				
 				//go through MyEggedData
 				// if isValidFale -> select in table, select isExport
@@ -550,8 +624,6 @@ public class MainWindow {
 		EggedExistingPackages.put ("Pub8000", 	false);
 	} //DeclareUsableEggedPackages
 	
-	
-	
 	boolean AllActiveEggedPackagesExist() {
 		// This method checks if all active egged packages exist as files in the selected folder
 		
@@ -566,8 +638,6 @@ public class MainWindow {
 		}
 		return isAllFilesExist;
 	} //AllActiveEggedPackagesExist
-	
-
 	
 	void FormActiveEggedPackages (String SelectedFolder) {
 		//This method creates a list of egged active packages
@@ -589,8 +659,6 @@ public class MainWindow {
 		} // for
 	} // FormActiveEggedPackages
 	
-
-	
 	String FormActivePackageNames () {
 		// This method returns a string with active egged packages names
 		
@@ -605,8 +673,6 @@ public class MainWindow {
 		}
 		return PackagesNames;
 	} // FormActivePackageNames
-
-	
 	
 	boolean AllFilesunzippedSuccessfully() {
 		// This method unzips all active egged packages
@@ -632,11 +698,6 @@ public class MainWindow {
 		//System.out.println("AllFilesunzippedSuccessfully : " + isAllFilesUnziped);
 		return isAllFilesUnziped;
 	} //UnzipActivePackages
-	
-	
-	
-	
-	
 	
 	boolean VersionFilesReadSuccessfully () {
 		// This method reads the versions files into the EggedData object
@@ -673,10 +734,6 @@ public class MainWindow {
 
 		return isAllVersionFilesRead;
 	} //isAllVersionFilesRead
-	
-	
-	
-	
 	
 	boolean DataFilesHeadersReadSuccessfully () {
 		// This method reads the data files into the EggedData object
@@ -735,8 +792,61 @@ public class MainWindow {
 		
 	} //DataFilesHeadersReadSuccessfully
 	
-	
-	
+	// Reads Egged Data Files
+	boolean EggedDataFilesReadSuccessfully () {
+		
+		boolean isAllDataFilesReadSuccessfully;
+		
+		EggedPackageFileReader MyPackageFileReader = new EggedPackageFileReader();
+		
+		// loop through files in EggedData.EggedDataFileList
+		// For every file take its FileNameFull and PackageName
+		// The Package Path is in EggedActivePackages
+			//0 = PackageName
+			//1 = PackageName.zip
+			//2 = Package Full Path
+			//3 = Path where to unzip the package
+		// Search for the current Package in the EggedActivePackages and fetch its path
+		// Form Existing FILE for reading
+		
+		try {
+			for (int i = 0; i < MyEggedData.getEggedDataFileList().size(); i++) {
+				String Package = MyEggedData.getEggedDataFileList().get(i).getPackageName();
+				String FileNameFull = MyEggedData.getEggedDataFileList().get(i).getFileNameFull();
+				String PackagePath = "";
+				boolean isFileHasFooter = MyEggedData.getEggedDataFileList().get(i).getFileHeader().getSignatureFlag();
+				
+				//System.out.println("Package: " + Package);
+				//System.out.println("FileNameFull: " + FileNameFull);
+
+				//Searching for the right package in EggedActivePackages and getting its FullPath
+				for (int j = 0; j < EggedActivePackages.size(); j++) {
+					if (EggedActivePackages.get(j).get(0) == Package) {
+						PackagePath = EggedActivePackages.get(j).get(3);
+					}
+				} //for j
+				String FileNameFullPath = PackagePath + "\\" + FileNameFull;
+				
+				//System.out.println("PackagePath: " + PackagePath);
+				
+				File f = new File(FileNameFullPath);
+				
+				if (f.exists()) {
+					//read file f into EggedDataFile.Data 
+					MyEggedData.getEggedDataFileList().get(i).setData(MyPackageFileReader.ReadEggedDataFile(f, isFileHasFooter));
+				}
+				
+			}//for i
+			
+			isAllDataFilesReadSuccessfully = true;
+		} catch (Exception e) {
+			isAllDataFilesReadSuccessfully = false;
+			System.out.println("Main Window Class: Method: EggedDataFilesReadSuccessfully: Exception occured: " + e.toString());
+
+		}
+		
+		return isAllDataFilesReadSuccessfully;
+	} //EggedDataFilesReadSuccessfully
 	
 	boolean FilledTablesWithDataSuccessfully() {
 		
@@ -773,7 +883,6 @@ public class MainWindow {
 			PackagesTableModel.addRow(new Object[] {MyEggedData.getEggedVersionFileList().get(i).getPackageName(),
 					MyEggedData.getEggedVersionFileList().get(i).getPackageDataVer(),
 					MyEggedData.getEggedVersionFileList().get(i).getPacakageDataStructure()});
-			
 		} // for
 		
 		
@@ -785,15 +894,8 @@ public class MainWindow {
 														  .reversed())
 				);
 
-//		for debugging purposes
-//		for (int i = 0; i < MyEggedData.getEggedDataFileList().size(); i++) {
-//			System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getPackageName() + " ");
-//			System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getFileNameFull() + " ");
-//			System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getDataVer() + " ");
-//			System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getStartDate() + " ");
-//			System.out.println(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getEndDate());
-//		}
-		
+		//for debugging purposes
+		//PrintEggedDataProperties();
 		
 
 		//fill in the Files Table
@@ -855,7 +957,7 @@ public class MainWindow {
 		rbtnAutoFilesSelector_AllFiles.setEnabled(false);
 	} //DisableControls
 	
-	 int getRowByValue(DefaultTableModel model, Object value) {
+	int getRowByValue(DefaultTableModel model, Object value) {
 		    for (int i = model.getRowCount() - 1; i >= 0; --i) {
 		        for (int j = model.getColumnCount() - 1; j >= 0; --j) {
 		            if (model.getValueAt(i, j).equals(value)) {
@@ -867,13 +969,124 @@ public class MainWindow {
 			return 0;
 		 } //getRowByValue
 	 
-	 void ClearTableBooleanSelection(DefaultTableModel model) {
+	void ClearTableBooleanSelection(DefaultTableModel model) {
 		    for (int i = model.getRowCount() - 1; i >= 0; --i) {
 		    	model.setValueAt(false, i, 0);
 		    }
 	 }
 
+	void PrintEggedDataProperties() {
+			for (int i = 0; i < MyEggedData.getEggedDataFileList().size(); i++) {
+				System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getIsExportToExcel() + " ");
+				System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getPackageName() + " ");
+				System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getFileNameFull() + " ");
+				System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getDataVer() + " ");
+				System.out.print(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getStartDate() + " ");
+				System.out.println(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getEndDate());
+		}
+	 } // PrintEggedDataProperties
 	 
+	void PrintDataFromEggedDataFileList(String FileNameFull) {
+		 
+		 for (int i = 0; i < MyEggedData.getEggedDataFileList().size(); i++) {
+			 if (MyEggedData.getEggedDataFileList().get(i).getFileNameFull() == FileNameFull) {
+				 //Print the Data of this file
+					 PrintRecords(MyEggedData.getEggedDataFileList().get(i).getData(), 4);
+			 } // if this is the file
+		 }// for i
+		 
+	 } //PrintDataFromEggedDataFileList
 
+	private void PrintRecords(List<List<String>> records, int PrintMaxLinesFromAboveAndBelow) {
+			
+			System.out.println("Total Number of lines: " + records.size());
+			boolean isDotsPrinted = false;
+			
+			for (int i = 0; i < records.size(); i++) {
+				
+				//should print the first part of the records
+				if (i <= PrintMaxLinesFromAboveAndBelow) {
+					
+					//printing the line
+					System.out.print("Line[" + i + "]: ");
+					for (int j = 0; j < records.get(i).size(); j++) {
+						System.out.print(records.get(i).get(j));
+						if (j !=records.get(i).size()-1) {
+							System.out.print(", ");
+						}
+		    		}
+					System.out.println();
+				}
+				
+				// should print the dots 
+				if ((i > PrintMaxLinesFromAboveAndBelow) && (i < (records.size() - PrintMaxLinesFromAboveAndBelow))) {
+					// shouold print dots
+					if (isDotsPrinted == false) {
+						System.out.println(".....");
+						isDotsPrinted = true;
+					}
+				} 
+				
+				// should print the last part of the records 
+				if (i >= (records.size() - PrintMaxLinesFromAboveAndBelow)) {
+					//printing the line
+					System.out.print("Line[" + i + "]: ");
+					for (int j = 0; j < records.get(i).size(); j++) {
+						System.out.print(records.get(i).get(j));
+						if (j !=records.get(i).size()-1) {
+							System.out.print(", ");
+						}
+		    		}
+					System.out.println();
+				}//if 
+			}
+		} // PrintRecords()
+
+	boolean ExportSelectedFilesToExcelSuccessfully() {
+		
+		// pass all data to Excel Provider
+		// pass to ExcelProvider if it is the only process or not
+		// pass what % of all the processes the ExcelProvides is
+		// Start Thread of Excel Provider
+		
+		String ExcelFoler = SelectedFolder;
+		
+		int NumberOfThreads=0, PercentOfAllThreads=0;
+		if (chckbxIsExportToExcel.isSelected()) {
+			NumberOfThreads++;
+		}
+		if (chckbxIsExportToSqlite.isSelected()) {
+			NumberOfThreads++;
+		}
+		if (NumberOfThreads > 0) {
+			PercentOfAllThreads = 100/NumberOfThreads;			
+		} else {
+			PercentOfAllThreads = 100;
+		}
+		
+		
+
+
+		
+		Thread MyExcelProvider = new ExcelProvider(MyEggedData.getEggedDataFileList(), ExcelFoler, PercentOfAllThreads);
+		((ExcelProvider) MyExcelProvider).setlblProgressLabel(lblProgressLabel);
+		((ExcelProvider) MyExcelProvider).setProgressBar(progressBar);
+		MyExcelProvider.start();
+		
+		return true;
+		
+	}
+	boolean ExportAllDatatoSQLiteSuccessfully() {
+		// pass all data to SQLite Provider
+		// pass to SQLProvider if it is the only process or not
+		// pass what % of all the processes the SQLiteProvides is
+		// Start Thread of Excel Provider
+		
+		return true;
+	}
+	
+	
 	
 } //class MainWindow
+
+

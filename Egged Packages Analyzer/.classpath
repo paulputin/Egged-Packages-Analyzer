@@ -7,5 +7,14 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="miglayout15-swing.jar" sourcepath="miglayout-src.zip"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/commons-collections4-4.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/commons-compress-1.18.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/poi-4.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/poi-ooxml-4.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/poi-ooxml-schemas-4.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/sqlite-jdbc-3.27.2.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/paulputin.ORT-CORP/git/Egged-Packages-Analyzer/Egged Packages Analyzer/lib/xmlbeans-3.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

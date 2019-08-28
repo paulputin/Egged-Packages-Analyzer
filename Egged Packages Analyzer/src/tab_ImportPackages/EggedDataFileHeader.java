@@ -15,7 +15,12 @@ public class EggedDataFileHeader {
 	}//constructor
 	
 	EggedDataFileHeader(EggedDataFileHeader edfh, String PackageName, String FileNameFull, String FileNameShort, String FileExtension) {
-		this.SignatureFlag = edfh.getSignatureFlag();
+		if (edfh.getSignatureFlag() == true) {
+			this.SignatureFlag = "1";
+		} else {
+			this.SignatureFlag = "0";
+		}
+		//this.SignatureFlag = edfh.getSignatureFlag();
 		this.KeyVersion = edfh.getKeyVersion();
 		this.PackageName = PackageName;
 		this.FileNameFull = FileNameFull;
@@ -103,8 +108,12 @@ public class EggedDataFileHeader {
 		return isNewFile;
 	}
 	
-	public String getSignatureFlag () {
-		return this.SignatureFlag;
+	public boolean getSignatureFlag () {
+		if (this.SignatureFlag.equals("1")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public String getKeyVersion () {

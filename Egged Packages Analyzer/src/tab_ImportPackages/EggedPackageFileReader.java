@@ -14,7 +14,7 @@ import java.util.List;
 public class EggedPackageFileReader {
 	
 	
-	
+	// Reads Version.txt files
 	public EggedVersionFile ReadVersionFile (File f) {
 		
 		EggedVersionFile evf = new EggedVersionFile();
@@ -64,6 +64,7 @@ public class EggedPackageFileReader {
 	} // ReadVersionFile
 
 	
+	//Reads headers of Egged Validator Data Files
 	public EggedDataFileHeader ReadEggedDataFileHeader(File f) {
 		
 		EggedDataFileHeader edfh = new EggedDataFileHeader();
@@ -125,5 +126,65 @@ public class EggedPackageFileReader {
 		
 		return edfh;
 	}//ReadEggedDataFileHeader
+
+	
+	//Reads Data from EggedDataFile
+	public List<List<String>> ReadEggedDataFile(File f, boolean isFileHasFooter) {
+		List<List<String>> records = new ArrayList<>();
+
+		try (
+				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(f.toString())), "UTF-16LE"))
+			)
+		{
+		    String line;
+		    int LineNumber = 1;
+		    while ((line = br.readLine()) != null) {
+		    	if (LineNumber > 2) {
+		    		String[] values = line.split(",",-1);
+		    		records.add(Arrays.asList(values));
+		    	}
+    			
+    			LineNumber++;
+		    } // while ((line = br.readLine()) != null)
+		} //try
+		
+		
+    	catch (UnsupportedEncodingException e) 
+    	{
+    		System.out.println(e.getMessage());
+    	} 
+		catch (FileNotFoundException e) {
+			System.out.println("EggedPackageFileReader Class: Method ReadEggedDataFile. FileNotFoundException: file is " + f.toString() + "Exception is " + e.toString());
+		} catch (IOException e) {
+			System.out.println("EggedPackageFileReader Class: Method: ReadEggedDataFile. IOException: file is " + f.toString()+ "Exception is " + e.toString());
+		}
+
+		
+		//Take Care Of the Footer of the Data file
+		// if the last line not equals in size to the first line => it is probably junk => Delete last Line. Repeat.
+	    if (isFileHasFooter)
+	    {
+	    	boolean isProbablyTheLastJunkLine = false;
+	    
+	    	while (!isProbablyTheLastJunkLine) {
+	    		if (records.size() > 0)
+	    		{
+	    		if (records.get(records.size()-1).size() != records.get(0).size())
+	    			{
+	    			records.remove(records.size() - 1);
+	    			}
+	    			else {
+	    					isProbablyTheLastJunkLine = true;
+	    				}
+	    		}
+	    		else {
+	    				isProbablyTheLastJunkLine = true;
+	    			}
+	    	}//while isProbablyNotLastJunkLine 
+	    }  //Take Care Of the Footer of the Data file
+	    
+	    
+		return records;
+	} //ReadEggedDataFile()
 	
 }
