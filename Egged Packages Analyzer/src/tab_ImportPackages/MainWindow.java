@@ -1049,7 +1049,6 @@ public class MainWindow {
 		// pass what % of all the processes the ExcelProvides is
 		// Start Thread of Excel Provider
 		
-		String ExcelFoler = SelectedFolder;
 		
 		int NumberOfThreads=0, PercentOfAllThreads=0;
 		if (chckbxIsExportToExcel.isSelected()) {
@@ -1068,7 +1067,7 @@ public class MainWindow {
 
 
 		
-		Thread MyExcelProvider = new ExcelProvider(MyEggedData.getEggedDataFileList(), ExcelFoler, PercentOfAllThreads);
+		Thread MyExcelProvider = new ExcelProvider(MyEggedData.getEggedDataFileList(), SelectedFolder, PercentOfAllThreads);
 		((ExcelProvider) MyExcelProvider).setlblProgressLabel(lblProgressLabel);
 		((ExcelProvider) MyExcelProvider).setProgressBar(progressBar);
 		MyExcelProvider.start();
