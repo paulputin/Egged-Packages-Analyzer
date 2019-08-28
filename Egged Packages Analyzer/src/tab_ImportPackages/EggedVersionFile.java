@@ -9,7 +9,7 @@ public class EggedVersionFile {
 	private List<List<String>> FileNames = new ArrayList<>();
 	
 	public EggedVersionFile() {
-		// TODO Auto-generated constructor stub
+
 	}
 	
 	EggedVersionFile (EggedVersionFile evf, String PackageName) {

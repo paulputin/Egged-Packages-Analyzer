@@ -11,6 +11,7 @@ public class EggedDataFile {
 	
 	EggedDataFile () {
 		
+		
 	} //constructor
 
 	EggedDataFile (EggedDataFileHeader edfh) {

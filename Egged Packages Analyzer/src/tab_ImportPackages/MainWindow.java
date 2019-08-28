@@ -206,7 +206,6 @@ public class MainWindow {
 						// 6. Display Packages and Files Info for Selecting
 						// display all files in the table
 
-					
 					}
 			
 					//No Folder was Selected...

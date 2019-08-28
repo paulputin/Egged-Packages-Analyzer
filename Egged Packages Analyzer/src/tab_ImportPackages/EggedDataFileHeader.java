@@ -181,8 +181,7 @@ public class EggedDataFileHeader {
 		        if(todayDate.after(ParsedStartDate) && todayDate.before(ParsedEndDate)) {
 		        	this.isValidFile = true;
 		        }
-		        else 
-		        {
+		        else {
 		        	this.isValidFile = false;
 		        }
 		        

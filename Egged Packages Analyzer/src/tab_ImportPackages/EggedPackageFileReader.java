@@ -61,7 +61,6 @@ public class EggedPackageFileReader {
 		}
 		
 		return evf;
-		
 	} // ReadVersionFile
 
 	
