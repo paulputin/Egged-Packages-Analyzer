@@ -75,6 +75,8 @@ public class EggedDataExporter extends Thread{
 		
 		int ActionsCount = 0;
 		
+		
+		//Counting Excel Exporter Actions
 		if (isExportToExcelNeeded) {
 			ExcelProvider MyExcelProvider = new ExcelProvider(EggedDataFileList, 
 															  CurrentFolder, 
@@ -82,7 +84,8 @@ public class EggedDataExporter extends Thread{
 															  progressBar);
 			ActionsCount = ActionsCount + MyExcelProvider.getExcelExportActionsCount();
 		}
-		
+
+		//Counting SQLite Exporter Actions
 		if (isExportToSQLiteNeeded) {
 			SQLiteProvider mySQLiteProvider = new SQLiteProvider(EggedVersionFileList, 
 																 EggedDataFileList, 
@@ -92,10 +95,12 @@ public class EggedDataExporter extends Thread{
 			ActionsCount = ActionsCount + mySQLiteProvider.getSQLiteExportActionsCount();
 		}
 
+		//Setting Progress Bar
 		this.progressBar.setMinimum(0);
 		this.progressBar.setMaximum(ActionsCount);
 		this.progressBar.setValue(0);
 
+		//Executing Excel Export
 		if (isExportToExcelNeeded) {
 			ExcelProvider MyExcelProvider = new ExcelProvider(EggedDataFileList, 
 					  CurrentFolder, 
@@ -105,6 +110,7 @@ public class EggedDataExporter extends Thread{
 		}
 		
 		
+		//Small Pause between Excel Exporter and SQLite Exporter
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -112,6 +118,7 @@ public class EggedDataExporter extends Thread{
 			e.printStackTrace();
 		}
 		
+		//Executing SQLite Export
 		if (isExportToSQLiteNeeded) {
 			SQLiteProvider mySQLiteProvider = new SQLiteProvider(EggedVersionFileList, 
 																 EggedDataFileList, 
