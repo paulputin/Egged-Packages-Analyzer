@@ -255,11 +255,13 @@ public class SQLiteProvider{
 			//Create Ending
 			for (int i = 1; i < Data.size(); i++) {
 				if (wasExecuted) {
+					//Forming the beginning of transaction for every N lines
 					stat.addBatch("BEGIN TRANSACTION;");
 					wasExecuted = false;
 				}
 				for (int j = 0; j < Data.get(i).size(); j++) {
 					String ColumnData = Data.get(i).get(j);
+					//removing the " symbol from the Data. It results in errors in the transactions 
 					ColumnData = ColumnData.replaceAll("[\"]", "");
 					if (j == Data.get(i).size()-1) {
 						SQLInsertEnding = SQLInsertEnding + "\"" + ColumnData + "\""+ ");";	
@@ -272,7 +274,7 @@ public class SQLiteProvider{
 				stat.addBatch(SQLInsertFinal);
 				SQLInsertEnding="";
 
-				//Execute Commit For Every 100 lines 
+				//Execute COMMIT For Every N lines 
 				if ((i%1000==0) || (i  == Data.size()-1)) {
 					stat.addBatch("COMMIT;");
 					stat.executeBatch();
@@ -280,22 +282,10 @@ public class SQLiteProvider{
 				} // if (i%100==0)
 			} // for i
 		
-			//stat.addBatch("COMMIT;");
-			//stat.executeBatch();
-				
-				//System.out.println(SQLInsertFinal);
-			
-
-			//stat.executeUpdate(SQLInsertFinal); 
-			//stat.close();
-			
 		} catch (SQLException e) {
 			System.out.println("Class: ExportSQLiteData Method: CreateAndPopulateTable (Insert) SQLException " + e.toString());
-			System.out.println(SQLInsertFinal);
-			//JOptionPane.showMessageDialog(null, "Class: ExportSQLiteData Method: CreateAndPopulateTable (Insert) SQLException " + e.toString());
+			//System.out.println(SQLInsertFinal);
         }
-
-		
 
 	} //CreateAndPopulateTable
 	
