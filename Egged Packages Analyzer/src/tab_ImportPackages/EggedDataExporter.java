@@ -112,7 +112,12 @@ public class EggedDataExporter extends Thread{
 		
 		//Small Pause between Excel Exporter and SQLite Exporter
 		try {
-			Thread.sleep(2000);
+			if (isExportToExcelNeeded) {
+				Thread.sleep(2000);
+			} else {
+				Thread.sleep(100);
+			}
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

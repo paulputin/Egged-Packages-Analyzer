@@ -914,7 +914,6 @@ public class MainWindow {
 
 		//fill in the Files Table
 		//FilesTableModel
-
 		for (int i = 0; i < MyEggedData.getEggedDataFileList().size(); i++) {
 			
 			//System.out.println(MyEggedData.getEggedDataFileList().get(i).getFileHeader().getPackageName());
