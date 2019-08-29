@@ -26,37 +26,36 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
-public class ExcelProvider extends Thread{
+public class ExcelProvider{
 	
 	private static final int WIDTH_ARROW_BUTTON = 340;
 
-	int PercentOfAllThreads;
-	String ExcelFolder;
+	String CurrentFolder;
     Workbook workbook = new XSSFWorkbook();
-    private List<EggedDataFile> EggedDataFileList = new ArrayList<EggedDataFile>();
-    
+
     JLabel lblProgressLabel;
     JProgressBar progressBar;
     
+    private List<EggedDataFile> EggedDataFileList = new ArrayList<EggedDataFile>();
+    
     //constructor
-    ExcelProvider(List<EggedDataFile> EggedDataFileList, String ExcelFolder, int PercentOfAllThreads) {
-    	setData(EggedDataFileList);
-    	setExcelFolder(ExcelFolder);
-    	setPercentOfAllThreads(PercentOfAllThreads);
+    ExcelProvider(List<EggedDataFile> EggedDataFileList, String CurrentFolder, JLabel lblProgressLabel, JProgressBar progressBar) {
+    	setEggedDataFileList(EggedDataFileList);
+    	setCurrentFolder(CurrentFolder);
+    	setlblProgressLabel(lblProgressLabel);
+    	setProgressBar(progressBar);
     } //constructor
     
     
-    public void setData(List<EggedDataFile> EggedDataFileList) {
+
+	public void setEggedDataFileList(List<EggedDataFile> EggedDataFileList) {
     	this.EggedDataFileList = EggedDataFileList;
     }
     
-    public void setExcelFolder(String ExcelFolder) {
-    	this.ExcelFolder = ExcelFolder;
+    public void setCurrentFolder(String CurrentFolder) {
+    	this.CurrentFolder = CurrentFolder;
     }
     
-    public void setPercentOfAllThreads(int PercentOfAllThreads) {
-    	this.PercentOfAllThreads = PercentOfAllThreads;
-    }
     
     public void setlblProgressLabel(JLabel lblProgressLabel) {
     	this.lblProgressLabel = lblProgressLabel;
@@ -67,29 +66,34 @@ public class ExcelProvider extends Thread{
     	
     }
     
-	@Override
-	public void run() {
-
+	public int getExcelExportActionsCount() {
+		int ActionsCount = 0;
+		
 		//count MaxValue for Progress bar: Sheets + Columns + Write File
-		int ProgressBarMaxValue = 0;
 		for (int i = 0; i < EggedDataFileList.size(); i++) {
 			if (EggedDataFileList.get(i).getIsExportToExcel() == true) {
 				//Counting Sheets 
-				ProgressBarMaxValue++;
+				ActionsCount++;
 				for (int j = 0; j < EggedDataFileList.get(i).getData().get(0).size(); j++) {
 					//Counting Columns
-					ProgressBarMaxValue++;
+					ActionsCount++;
 				}
 			}
 		}
 		//Counting Excel File Save
-		ProgressBarMaxValue++;
+		ActionsCount++;
 		
-		this.progressBar.setMinimum(0);
-		this.progressBar.setMaximum(ProgressBarMaxValue);
-		this.progressBar.setValue(0);
+		//Calculating at Which Percent To Stop
+//		ProgressBarMaxValue = ProgressBarMaxValue*100/AtWhichPersentToStop;
 		
+//		this.progressBar.setMaximum(ProgressBarMaxValue);
+//		this.progressBar.setValue(0);
 
+		return ActionsCount;
+	} // getExportActionsCount()
+
+    
+	public void ExportExcelData() {
 
 		//iterate through all DataFiles and Export them to Worksheets = 5% Time Consuming
 
@@ -103,16 +107,15 @@ public class ExcelProvider extends Thread{
 				
 			}
 		} // for
-		//progressBar.setValue(5);
 		
 		
 		//autosizing columns width = 95% Time Consuming
 		autoSizeColumns(workbook);
-		//progressBar.setValue(99);
+
 		
 		
 		//Creating Excel file = 1% Time Consuming
-		if (WriteExcelFile (ExcelFolder) == true) {
+		if (WriteExcelFile (CurrentFolder) == true) {
 			//System.out.println("Class: ExcelProvider, Method: run, WriteExcelFile successfull.");
 			lblProgressLabel.setText("Creaing Excel: Saved Excel File successfully.");
 		} else {
@@ -120,10 +123,14 @@ public class ExcelProvider extends Thread{
 			lblProgressLabel.setText("Creaing Excel: Saving Excel File failed.");
 		}
 		progressBar.setValue(progressBar.getValue()+1);
-		//progressBar.setValue(100);
+		
+		// Create SQLExporter
+		// Count Actions
+		// Execute Actions
+		// Update ProgressLabel and ProgressBar
 		
 		
-	} //run
+	} //ExcelExportData
     
     
     

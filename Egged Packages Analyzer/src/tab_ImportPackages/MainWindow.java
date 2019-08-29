@@ -109,7 +109,6 @@ public class MainWindow {
 	boolean isPackagesReadCorrectly = false;
 	EggedData MyEggedData = new EggedData();
 	
-	
 
 	/**
 	 * Launch the application.
@@ -240,9 +239,24 @@ public class MainWindow {
 					DisableControls();
 					btnSelectFolder.setEnabled(false);
 					btnSelectSQLiteFile.setEnabled(false);
+
+					Thread MyDataExporter = new EggedDataExporter(chckbxIsExportToExcel.isSelected(),
+															 	  chckbxIsExportToSqlite.isSelected(),
+															 	  MyEggedData.getEggedVersionFileList(),
+															 	  MyEggedData.getEggedDataFileList(),
+															 	  SelectedFolder,
+															 	  lblProgressLabel,
+															 	  progressBar); 
 					
-					boolean isExportedToExcel = ExportSelectedFilesToExcelSuccessfully();
-					boolean isExportedToSQLite = ExportAllDatatoSQLiteSuccessfully();
+					MyDataExporter.start();
+					
+					
+//					if (chckbxIsExportToExcel.isSelected()) {
+//						boolean isExportedToExcel = ExportSelectedFilesToExcelSuccessfully();
+//					}
+//					if (chckbxIsExportToSqlite.isSelected()) {
+//						boolean isExportedToSQLite = ExportAllDatatoSQLiteSuccessfully();
+//					}
 					
 					// if isExportToExcel => run Thread ExportToExcel until it finishes
 					// if isExporttoSQL => run Thread ExportToSQL until it finishes
@@ -250,7 +264,7 @@ public class MainWindow {
 					
 					
 					//After processes end:
-						// diplay success message
+						// display success message
 						// Enable buttons;
 						// Do not Enable Tables
 						// release all big Data Objects
@@ -1041,48 +1055,6 @@ public class MainWindow {
 				}//if 
 			}
 		} // PrintRecords()
-
-	boolean ExportSelectedFilesToExcelSuccessfully() {
-		
-		// pass all data to Excel Provider
-		// pass to ExcelProvider if it is the only process or not
-		// pass what % of all the processes the ExcelProvides is
-		// Start Thread of Excel Provider
-		
-		
-		int NumberOfThreads=0, PercentOfAllThreads=0;
-		if (chckbxIsExportToExcel.isSelected()) {
-			NumberOfThreads++;
-		}
-		if (chckbxIsExportToSqlite.isSelected()) {
-			NumberOfThreads++;
-		}
-		if (NumberOfThreads > 0) {
-			PercentOfAllThreads = 100/NumberOfThreads;			
-		} else {
-			PercentOfAllThreads = 100;
-		}
-		
-		
-
-
-		
-		Thread MyExcelProvider = new ExcelProvider(MyEggedData.getEggedDataFileList(), SelectedFolder, PercentOfAllThreads);
-		((ExcelProvider) MyExcelProvider).setlblProgressLabel(lblProgressLabel);
-		((ExcelProvider) MyExcelProvider).setProgressBar(progressBar);
-		MyExcelProvider.start();
-		
-		return true;
-		
-	}
-	boolean ExportAllDatatoSQLiteSuccessfully() {
-		// pass all data to SQLite Provider
-		// pass to SQLProvider if it is the only process or not
-		// pass what % of all the processes the SQLiteProvides is
-		// Start Thread of Excel Provider
-		
-		return true;
-	}
 	
 	
 	
